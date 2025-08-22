@@ -43,13 +43,15 @@ Koi.sln
 │  │  └─ Koi.BuildingBlocks.Presentation
 │
 │  ├─ Koi.Identity             # authN/authZ, users, roles, permissions
-│  │  ├─ Domain | Application | Infrastructure | Api
-│  │  ├─ Services/             # ➕ tambahan sub-modul
-│  │  │  ├─ UserManagement/    # CRUD user, reset password, profil
-│  │  │  ├─ RoleManagement/    # buat role, assign user→role
-│  │  │  ├─ PermissionService/ # izin modul: ex. akses Sparepart
-│  │  │  └─ TokenService/      # JWT, refresh token, SSO integration
-│  │  └─ ExternalProviders/    # ➕ integrasi OAuth2, AzureAD, Google SSO
+│  │  ├─ Domain | Api
+│  │  ├─ Application
+│  │  │  ├─ Services/             # ➕ tambahan sub-modul
+│  │  │     ├─ UserManagement/    # CRUD user, reset password, profil
+│  │  │     ├─ RoleManagement/    # buat role, assign user→role
+│  │  │     ├─ PermissionService/ # izin modul: ex. akses Sparepart
+│  │  │     └─ TokenService/      # JWT, refresh token, SSO integration
+│  │  ├─ Infrastructure
+│  │     └─ ExternalProviders/    # ➕ integrasi OAuth2, AzureAD, Google SSO
 │
 │  ├─ Koi.Service              # bengkel (perawatan & perbaikan)
 │  │  ├─ Domain | Application | Infrastructure | Api
@@ -509,6 +511,60 @@ public sealed record ReceiveStockResponse(Guid ReceiptId);
 -   `Koi.Janaru.Tax`
     
 
+2. Identity vs Security 🔄
+
+Koi.Identity → fokus authN/authZ (users, roles, tokens, SSO).
+
+Koi.Security → fokus cross-cutting: RBAC enforcement, audit, compliance, encryption.
+👉 Jangan duplikasi role/permission di dua tempat, semua definisi role/permission tetap di Identity, tapi enforcement & audit di Security.
+
+3. Outbox & Eventing 📤
+
+Tambahkan alur yang jelas:
+
+Domain Event → Outbox Event → Publisher → External Bus
+
+👉 Jadi tidak ada event langsung keluar tanpa lewat outbox.
+
+4. Observability 🔍
+
+Tambahkan 2 hal:
+
+Correlation Id Middleware (tiap request traceable end-to-end).
+
+Alert Rules di Koi.Monitoring (ex. suspicious login, negative stock).
+
+5. Database Strategy 🗄️
+
+Sudah oke partisi by period_month + branch_code.
+Tambahkan:
+
+Auto Partition Manager → job scheduler untuk create/drop partisi.
+
+Composite Index → (branch_code, period_month) supaya query reporting cepat.
+
+6. Testing 🔬
+
+Tambahkan:
+
+Property-based Testing untuk domain rules (contoh: validasi perhitungan pajak, posting GL).
+
+7. CI/CD 🚀
+
+Tambahkan:
+
+DB Migration Automation (jalankan migrasi otomatis saat deploy).
+
+Feature Flags untuk rollout bertahap modul baru.
+
+8. Roadmap 🛣️
+
+Spareparts → Service → BodyPaint → GL → Reporting tetap.
+Tambahan:
+
+Parallel Track Security (Koi.Identity + Koi.Security) harus dibangun sejak awal.
+
+Integration IBS Replication start dari modul pertama (Spareparts) supaya sinkronisasi data teruji lebih cepat.
 ----------
 
 ## 19 – What’s Next
