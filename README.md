@@ -120,8 +120,10 @@ Koi.sln
 
 ```
 
-> Modul bisa diaktif/nonaktif via feature flags. Jika nanti dipecah ke microservices, boundary sudah siap.
-> # 📝 Penjelasan per Bagian
+> Modul bisa diaktif/nonaktif via feature flags.
+> Jika nanti dipecah ke microservices, boundary sudah siap.
+
+# 📝 Penjelasan per Bagian
 
 ### 🔹 `build/`
 
@@ -218,8 +220,58 @@ Koi.sln
 
 ---
 
-## 3 – Lapisan per Modul (contoh Koi.Spareparts)
+## 3 – Lapisan per Modul 
 
+### 3A - Contoh Koi.Spareparts)
+```
+src/Koi.Sales/
+├─ Domain                                      # Lapisan inti bisnis, murni domain logic (tanpa dependensi luar)
+│  ├─ Entities                                 # Entitas utama → punya identity (ID) & lifecycle
+│  │  ├─ VehicleStock.cs                       # Representasi stok kendaraan di dealer (tersedia, reserved, dsb)
+│  │  ├─ VehicleOrder.cs                       # Pesanan kendaraan (customer, unit, tanggal, status)
+│  │  ├─ VehicleSale.cs                        # Penjualan kendaraan (harga, metode bayar, invoice, status paid)
+│  │  └─ DeliveryOrder.cs                      # Dokumen DO (pengiriman unit setelah penjualan selesai)
+│  ├─ ValueObjects                             # Objek nilai → tidak punya identity, equality by value
+│  │  ├─ VIN.cs                                # Vehicle Identification Number (unik, validasi format/length)
+│  │  └─ OrderNumber.cs                        # Nomor order (format tertentu, auto-generate)
+│  ├─ Repositories                             # Kontrak untuk akses data (abstraksi storage)
+│  │  ├─ IVehicleStockRepository.cs            # Kontrak akses/manipulasi stok kendaraan
+│  │  └─ IVehicleOrderRepository.cs            # Kontrak akses/manipulasi pesanan kendaraan
+│  └─ Events                                   # Domain events → menandakan perubahan signifikan
+│     ├─ VehicleOrdered.cs                     # Event saat kendaraan berhasil dipesan
+│     ├─ VehicleSold.cs                        # Event saat kendaraan berhasil terjual
+│     └─ VehicleDelivered.cs                   # Event saat kendaraan berhasil dikirim (DO diterbitkan)
+
+├─ Application                                 # Orkestrasi use case → pakai Domain untuk eksekusi perintah/kueri
+│  ├─ Commands                                 # Aksi → mengubah state
+│  │  ├─ PlaceOrderCommand.cs                  # Command membuat pesanan kendaraan baru
+│  │  ├─ ConfirmSaleCommand.cs                 # Command mengonfirmasi penjualan kendaraan
+│  │  └─ IssueDeliveryOrderCommand.cs          # Command menerbitkan DO (Delivery Order)
+│  ├─ Queries                                  # Aksi baca → tidak mengubah state
+│  │  ├─ GetStockQuery.cs                      # Query ambil daftar stok kendaraan
+│  │  └─ GetSalesReportQuery.cs                # Query laporan penjualan (periode tertentu)
+│  └─ Services                                 # Service khusus untuk logika bisnis lintas aggregate
+│     └─ SalesDomainService.cs                 # Contoh: validasi stok tersedia sebelum pesanan dibuat
+
+├─ Infrastructure                              # Implementasi teknis (DB, persistence, migrations, external IO)
+│  ├─ EFConfigurations                         # Mapping Entity Framework Core ke tabel
+│  │  └─ VehicleOrderConfiguration.cs          # Konfigurasi tabel VehicleOrder (kolom, relasi, constraint)
+│  ├─ Repositories                             # Implementasi dari kontrak Repository (pakai EF Core, Dapper, dsb)
+│  │  └─ VehicleOrderRepository.cs             # Implementasi IVehicleOrderRepository (akses database)
+│  └─ Migrations                               # Script perubahan database
+│     └─ 20250822_InitialSales.cs              # Migrasi awal schema modul Sales
+
+└─ Api                                        # Endpoint HTTP (REST/gRPC/GraphQL) untuk konsumsi client
+   ├─ Controllers                              # Controller ASP.NET Core → expose command/query ke luar
+   │  └─ SalesController.cs                    # API endpoint (POST /sales/order, GET /sales/report, dsb)
+   └─ DTOs                                    # Data Transfer Object → kontrak input/output API
+      ├─ PlaceOrderDto.cs                      # DTO request untuk membuat pesanan
+      ├─ ConfirmSaleDto.cs                     # DTO request untuk mengonfirmasi penjualan
+      └─ DeliveryOrderDto.cs                   # DTO request untuk menerbitkan DO
+
+```
+
+### 3B - Contoh Koi.Spareparts)
 ```
 src/Koi.Spareparts/
 ├─ Domain/
@@ -243,6 +295,12 @@ src/Koi.Spareparts/
    ├─ Controllers/ or MinimalEndpoints
    └─ Contracts/ (request/response)
 ```
+
+Jadi struktur ini benar-benar backend modular:
+Domain = inti aturan bisnis.
+Application = jalankan use case.
+Infrastructure = detail teknis (DB, repo).
+Api = expose ke dunia luar.
 
 ---
 
