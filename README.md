@@ -94,19 +94,25 @@ Koi.sln
 │  │  ├─ PowerBI/              # Power BI embedded connectors
 │  │  └─ DevExpress/           # DevExpress reports migration
 │
-│  ├─ Koi.Security             # modul security tambahan (SSO, audit trail, compliance)
-│  │  ├─ Domain | Application | Infrastructure | Api
-│  │  ├─ RBAC/                 # Role-Based Access Control granular
-│  │  │  ├─ PolicyService/     # aturan detail: ex. "ApproveWorkOrder"
-│  │  │  ├─ AccessMatrix/      # mapping role → permission → action
-│  │  │  └─ Enforcement/       # middleware filter per action/controller
-│  │  ├─ Audit/                # audit logging, data encryption
-│  │  │  ├─ AuditLogService/   # simpan log ke DB/ELK
-│  │  │  └─ ChangeTracker/     # hook EF Core → capture perubahan data
-│  │  ├─ Compliance/           # ➕ modul kepatuhan data sensitif
-│  │  │  ├─ DataEncryption/    # field-level encryption (NPWP, rekening)
-│  │  │  └─ GDPRModule/        # hak hapus, export data (future ready)
-│  │  └─ MonitoringHooks/      # integrasi dengan Koi.Monitoring (alert suspicious login)
+│  ├─ Koi.Security                  # modul security tambahan (SSO, RBAC granular, audit trail, compliance)
+│  │  ├─ Domain                      # inti business rules
+│  │  │  ├─ Entities/                # Role.cs, Permission.cs, AuditLog.cs
+│  │  │  ├─ ValueObjects/            # PolicyRule.cs, SensitiveField.cs
+│  │  │  ├─ Services/                # PolicyEvaluator.cs, AuditBuilder.cs
+│  │  │  └─ Events/                  # RoleAssigned.cs, SuspiciousLoginDetected.cs
+│  │  ├─ Application                 # use cases (commands, queries, policies)
+│  │  │  ├─ Commands/                # AssignRoleCommand.cs, RevokePermissionCommand.cs
+│  │  │  ├─ Queries/                 # GetUserPermissionsQuery.cs, GetAuditLogsQuery.cs
+│  │  │  └─ Handlers/                # implementasi CommandHandler & QueryHandler
+│  │  ├─ Infrastructure              # implementasi teknis
+│  │  │  ├─ Repositories/            # RoleRepository.cs, AuditLogRepository.cs
+│  │  │  ├─ EFConfigurations/        # RoleConfiguration.cs, AuditLogConfiguration.cs
+│  │  │  ├─ Encryption/              # FieldEncryptionProvider.cs
+│  │  │  └─ ChangeTracker/           # EF hook capture perubahan data sensitif
+│  │  └─ Api                         # expose endpoint
+│  │     ├─ Controllers/             # SecurityController.cs, AuditController.cs
+│  │     └─ DTOs/                    # AssignRoleDto.cs, AuditLogDto.cs
+
 │
 │  └─ Koi.Monitoring           # observability, metrics, health checks
 │     ├─ Logging/              # Serilog/Seq sink
