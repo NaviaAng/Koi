@@ -247,7 +247,7 @@ src/Koi.Spareparts/
    └─ Contracts/ (request/response)
 ```
 
-----------
+---
 
 ## 4 – Konvensi Namespace & Paket
 
