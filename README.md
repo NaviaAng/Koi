@@ -511,60 +511,45 @@ public sealed record ReceiveStockResponse(Guid ReceiptId);
 -   `Koi.Janaru.Tax`
     
 
-2. Identity vs Security 🔄
+## 19 - Identity vs Security 🔄
 
-Koi.Identity → fokus authN/authZ (users, roles, tokens, SSO).
+- Koi.Identity → fokus authN/authZ (users, roles, tokens, SSO).
+- Koi.Security → fokus cross-cutting: RBAC enforcement, audit, compliance, encryption.
 
-Koi.Security → fokus cross-cutting: RBAC enforcement, audit, compliance, encryption.
-👉 Jangan duplikasi role/permission di dua tempat, semua definisi role/permission tetap di Identity, tapi enforcement & audit di Security.
+Jangan duplikasi role/permission di dua tempat, semua definisi role/permission tetap di Identity, tapi enforcement & audit di Security.
 
-3. Outbox & Eventing 📤
-
+## 20 - Outbox & Eventing 📤
 Tambahkan alur yang jelas:
-
+````
 Domain Event → Outbox Event → Publisher → External Bus
-
+````
 👉 Jadi tidak ada event langsung keluar tanpa lewat outbox.
 
-4. Observability 🔍
-
+## 21 - Observability 🔍
 Tambahkan 2 hal:
+1. Correlation Id Middleware (tiap request traceable end-to-end).
+2. Alert Rules di Koi.Monitoring (ex. suspicious login, negative stock).
 
-Correlation Id Middleware (tiap request traceable end-to-end).
-
-Alert Rules di Koi.Monitoring (ex. suspicious login, negative stock).
-
-5. Database Strategy 🗄️
-
-Sudah oke partisi by period_month + branch_code.
+## 22 - Database Strategy 🗄️
 Tambahkan:
+- Auto Partition Manager → job scheduler untuk create/drop partisi.
+- Composite Index → (branch_code, period_month) supaya query reporting cepat.
 
-Auto Partition Manager → job scheduler untuk create/drop partisi.
-
-Composite Index → (branch_code, period_month) supaya query reporting cepat.
-
-6. Testing 🔬
-
+## 23 -  Testing 🔬
 Tambahkan:
+- Property-based Testing untuk domain rules (contoh: validasi perhitungan pajak, posting GL).
 
-Property-based Testing untuk domain rules (contoh: validasi perhitungan pajak, posting GL).
-
-7. CI/CD 🚀
-
+## 24 - CI/CD 🚀
 Tambahkan:
+- DB Migration Automation (jalankan migrasi otomatis saat deploy).
+- Feature Flags untuk rollout bertahap modul baru.
 
-DB Migration Automation (jalankan migrasi otomatis saat deploy).
-
-Feature Flags untuk rollout bertahap modul baru.
-
-8. Roadmap 🛣️
-
-Spareparts → Service → BodyPaint → GL → Reporting tetap.
+## 25 - Roadmap 🛣️
+- Spareparts → Service → BodyPaint → GL → Reporting tetap.
 Tambahan:
+- Parallel Track Security (Koi.Identity + Koi.Security) harus dibangun sejak awal.
+- Integration IBS Replication start dari modul pertama (Spareparts) supaya sinkronisasi data teruji lebih cepat.
 
-Parallel Track Security (Koi.Identity + Koi.Security) harus dibangun sejak awal.
-
-Integration IBS Replication start dari modul pertama (Spareparts) supaya sinkronisasi data teruji lebih cepat.
 ----------
 
 ## 19 – What’s Next
