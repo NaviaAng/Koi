@@ -8,7 +8,7 @@
 ## 1 – Prinsip Desain & Keputusan Arsitektur
 
 -   **Modular Monolith** dengan boundary domain tegas (DDD): tiap modul memiliki `Domain`, `Application`, `Infrastructure`, `Api`.
--   **CQRS**: Query terpisah dari Command; gunakan **MediatR** (atau in-proc mediator) + pipeline behaviors.
+-   **CQRS**: Query terpisah dari Command; gunakan **MediatR** (atau in-proc mediator **Cortext.Mediator** ) + pipeline behaviors.
 -   **Business Logic di Code** (bukan DB). Stored procedure lama dipindah ke **Domain Services / Application Handlers**.
 -   **PostgreSQL Centralized** (recommended): **partitioning by period (monthly)** + **subpartition by branch**. Tidak lagi bikin DB baru per bulan.
 -   **Outbox Pattern** untuk integrasi/eventual consistency dan audit.
