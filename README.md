@@ -194,16 +194,13 @@ Koi.sln
 ### 🔹 `src/Koi.Integration/`
 
 -   **Tujuan:** isolasi integrasi eksternal (DMS API, MySQL legacy, ETL, messaging).
-    
 -   **Kenapa dipisah:** biar domain bersih, tidak tergantung infra luar.
     
-
 ----------
 
 ### 🔹 `src/Koi.Reporting/`
 
 -   **Tujuan:** read model projection + endpoint query untuk BI.
-    
 -   **Kenapa dipisah:** pattern CQRS → baca & tulis bisa beda struktur.
     
 ----------
