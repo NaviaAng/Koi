@@ -25,101 +25,98 @@
 
 ```
 Koi.sln
-├─ build/                          # otomatisasi build & distribusi
-│  ├─ Directory.Build.props        # aturan build shared (C# langversion, analyzer)
-│  ├─ Directory.Build.targets      # target khusus (misal publish, sonar)
-│  └─ templates/                   # file nuspec, dockerfile template
+├─ build/                      # skrip build, templates, paket nuspec
+│  └─ Directory.Build.props    # central msbuild props (versi, style rules)
+├─ docker/                     # docker-compose infra dev
+│  ├─ docker-compose.yml       # postgres, pgadmin, jaeger, seq, redis, rabbitmq
+│  └─ init/                    # sql init: roles, extensions
+├─ aspire/                     # Aspire app host (compose orchestrator)
+│  ├─ AppHost/                 # deklarasi services (sql, seq, redis, mq)
+│  └─ Observability/           # tracing, metrics, dashboard
+├─ src/
+│  ├─ Koi.Bootstrap            # ASP.NET Core host (composition root)
+│  │  └─ Program.cs            # integrasi Aspire host & modul Koi
+│  ├─ Koi.BuildingBlocks       # shared abstractions & cross-cutting
+│  │  ├─ Koi.BuildingBlocks.Application
+│  │  ├─ Koi.BuildingBlocks.Domain
+│  │  ├─ Koi.BuildingBlocks.Infrastructure
+│  │  └─ Koi.BuildingBlocks.Presentation
 │
-├─ docker/                         # infra stateful (via Docker Compose)
-│  ├─ docker-compose.yml           # definisi service: Postgres, Redis, Jaeger, Seq, pgAdmin
-│  └─ init/                        # init script DB
-│     ├─ 01_roles.sql              # roles & permission dasar
-│     ├─ 02_extensions.sql         # extension (uuid-ossp, pg_trgm, dll)
-│     └─ 03_schema.sql             # schema default (core, read, intg)
+│  ├─ Koi.Identity             # authN/authZ, users, roles, permissions
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  │  ├─ Services/             # ➕ tambahan sub-modul
+│  │  │  ├─ UserManagement/    # CRUD user, reset password, profil
+│  │  │  ├─ RoleManagement/    # buat role, assign user→role
+│  │  │  ├─ PermissionService/ # izin modul: ex. akses Sparepart
+│  │  │  └─ TokenService/      # JWT, refresh token, SSO integration
+│  │  └─ ExternalProviders/    # ➕ integrasi OAuth2, AzureAD, Google SSO
 │
-├─ aspire/                         # Aspire orchestration untuk .NET services
-│  ├─ Koi.AppHost/                 # composition root Aspire
-│  │  └─ Program.cs                # definisi modul Koi.*.Api & referensi infra
-│  └─ Koi.ServiceDefaults/         # config shared (observability, healthcheck, retry)
-│     └─ Extensions.cs             # helper integrasi ke Jaeger, Seq, OpenTelemetry
-│
-├─ src/                            # kode utama (modular monolith style)
-│  ├─ Koi.Bootstrap/               # host ASP.NET utama (entry API Gateway/aggregator)
-│  │  └─ Program.cs                # entrypoint: load modul, apply middleware
+│  ├─ Koi.Service              # bengkel (perawatan & perbaikan)
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.BodyPaint            # body & cat
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.Spareparts           # parts sales & inventory
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.Sales                # penjualan kendaraan (opsional gelombang 2)
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.Janaru.GeneralLedger # accounting: GL
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.Janaru.AccountPayable
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  ├─ Koi.Janaru.Tax           # pajak (PPN, PPh)
+│  │  ├─ Domain | Application | Infrastructure | Api
 │  │
-│  ├─ Koi.BuildingBlocks/          # komponen cross-cutting & abstraksi shared
-│  │  ├─ Koi.BuildingBlocks.Domain/          # base Entity, AggregateRoot, ValueObject
-│  │  ├─ Koi.BuildingBlocks.Application/     # CQRS interface, Result<T>, Mediator pipeline
-│  │  ├─ Koi.BuildingBlocks.Infrastructure/ # base repository, EF/Pg adapter, unit of work
-│  │  └─ Koi.BuildingBlocks.Presentation/   # standar response API, exception filter
-│  │
-│  ├─ Koi.SharedKernel/            # seedwork domain spesifik IBS
-│  │  ├─ Money.cs                  # tipe uang konsisten
-│  │  ├─ BranchId.cs               # identitas cabang
-│  │  └─ Period.cs                 # periode (yyyyMM) wrapper
-│  │
-│  ├─ Koi.Identity/                # modul Identity (user, role, permission, token)
-│  │  ├─ Domain/                   # entity User, Role, Permission
-│  │  ├─ Application/              # use case (Login, AssignRole, ValidateToken)
-│  │  ├─ Infrastructure/           # repo EF/Pg, IdentityServer adapter
-│  │  └─ Api/                      # controller ASP.NET Core
-│  │
-│  ├─ Koi.Service/                 # modul Bengkel (Service/Repair/Maintenance)
-│  │  ├─ Domain/                   # entity: WorkOrder, Mechanic, ServiceItem
-│  │  ├─ Application/              # use case: OpenWO, CloseWO, AssignMechanic
-│  │  ├─ Infrastructure/           # repo, migrasi schema service
-│  │  └─ Api/                      # controller untuk CRUD & workflow
-│  │
-│  ├─ Koi.BodyPaint/               # modul Body & Cat
-│  │  ├─ Domain/                   # entity: RepairOrder, PaintJob
-│  │  ├─ Application/              # use case: EstimateRepair, ApproveJob
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Spareparts/              # modul Suku Cadang
-│  │  ├─ Domain/                   # entity: Part, Inventory, StockMovement
-│  │  ├─ Application/              # use case: OrderPart, AdjustStock
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Sales/                   # modul Penjualan Kendaraan (opsional wave 2)
-│  │  ├─ Domain/                   # entity: Vehicle, SalesOrder
-│  │  ├─ Application/              # use case: CreateSalesOrder, ApproveSales
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Janaru.GeneralLedger/    # modul Akuntansi - Buku Besar
-│  │  ├─ Domain/                   # entity: JournalEntry, Account
-│  │  ├─ Application/              # use case: PostJournal, ClosePeriod
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Janaru.AccountPayable/   # modul Akuntansi - Hutang
+│  ├─ Koi.SharedKernel         # seedwork domain (Result, AggregateRoot, dll.)
 │  │  ├─ Domain/
-│  │  ├─ Application/
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Janaru.Tax/              # modul Pajak (PPN, PPh)
-│  │  ├─ Domain/
-│  │  ├─ Application/
-│  │  ├─ Infrastructure/
-│  │  └─ Api/
-│  │
-│  ├─ Koi.Integration/             # adapter ke sistem luar (DMS, IBS legacy, ETL)
-│  │  ├─ DmsAdapter/               # konsumsi API DMS
-│  │  ├─ IbsLegacyAdapter/         # baca MySQL lama, ETL ke staging
-│  │  └─ Messaging/                # event bus / Kafka / RabbitMQ adapter
-│  │
-│  └─ Koi.Reporting/               # modul Reporting & BI projection
-│     ├─ Projection/               # read model builder
-│     ├─ Api/                      # endpoint query (read-only)
-│     └─ Integration/              # koneksi ke PowerBI/Metabase
+│  │  │  ├─ BaseEntity.cs          # entitas dengan Id, CreatedAt, UpdatedAt
+│  │  │  ├─ AggregateRoot.cs       # marker untuk aggregate root (DDD)
+│  │  │  ├─ ValueObject.cs         # base class untuk value objects
+│  │  │  ├─ Result.cs              # pattern Result<T> (success/failure)
+│  │  │  └─ DomainEvent.cs         # event domain base class
+│  │  │
+│  │  ├─ Events/
+│  │  │  ├─ IDomainEvent.cs        # interface event
+│  │  │  └─ DomainEventDispatcher.cs # mediator pattern
+│  │  │
+│  │  ├─ Exceptions/
+│  │  │  ├─ DomainException.cs     # custom exception domain
+│  │  │  └─ ValidationException.cs # validasi rules
+│  │  │
+│  │  └─ Specifications/
+│  │     └─ ISpecification.cs      # pattern specification (filtering rules)
 │
-└─ tests/                          # pengujian
-   ├─ Koi.UnitTests/               # test unit (fokus Domain & Application)
-   ├─ Koi.IntegrationTests/        # test integrasi modul & infra
-   └─ Koi.ContractTests/           # test API contract (OpenAPI snapshot, Verify)
+│  ├─ Koi.Integration          # adapters ke DMS, IBS legacy, ETL, messaging
+│  │  ├─ Messaging/            # RabbitMQ/Azure Service Bus adapters
+│  │  ├─ Replication/          # DataReplicationService (IBS legacy → Koi)
+│  │  └─ LegacyAdapters/       # konektor ke IBS lama (via DB/API)
+│
+│  ├─ Koi.Reporting            # readmodels, projections, BI adapters
+│  │  ├─ PowerBI/              # Power BI embedded connectors
+│  │  └─ DevExpress/           # DevExpress reports migration
+│
+│  ├─ Koi.Security             # modul security tambahan (SSO, audit trail, compliance)
+│  │  ├─ Domain | Application | Infrastructure | Api
+│  │  ├─ RBAC/                 # Role-Based Access Control granular
+│  │  │  ├─ PolicyService/     # aturan detail: ex. "ApproveWorkOrder"
+│  │  │  ├─ AccessMatrix/      # mapping role → permission → action
+│  │  │  └─ Enforcement/       # middleware filter per action/controller
+│  │  ├─ Audit/                # audit logging, data encryption
+│  │  │  ├─ AuditLogService/   # simpan log ke DB/ELK
+│  │  │  └─ ChangeTracker/     # hook EF Core → capture perubahan data
+│  │  ├─ Compliance/           # ➕ modul kepatuhan data sensitif
+│  │  │  ├─ DataEncryption/    # field-level encryption (NPWP, rekening)
+│  │  │  └─ GDPRModule/        # hak hapus, export data (future ready)
+│  │  └─ MonitoringHooks/      # integrasi dengan Koi.Monitoring (alert suspicious login)
+│
+│  └─ Koi.Monitoring           # observability, metrics, health checks
+│     ├─ Logging/              # Serilog/Seq sink
+│     ├─ Metrics/              # Prometheus/OpenTelemetry
+│     └─ HealthChecks/         # service/db health checks
+└─ tests/
+   ├─ Koi.UnitTests            # test unit (fokus Domain & Application)
+   ├─ Koi.IntegrationTests     # test integrasi modul & infra
+   ├─ Koi.ContractTests        # api contracts (e.g., OpenAPI, Verify, Snapshots)
+   └─ Koi.ReplicationTests     # tes replikasi data IBS → Koi
 
 ```
 
