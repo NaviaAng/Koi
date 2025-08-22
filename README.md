@@ -222,7 +222,7 @@ Koi.sln
 
 ## 3 – Lapisan per Modul 
 
-### 3A - Contoh Koi.Spareparts)
+### 3A - Contoh Koi.Sales
 ```
 src/Koi.Sales/
 ├─ Domain                                      # Lapisan inti bisnis, murni domain logic (tanpa dependensi luar)
