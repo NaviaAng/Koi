@@ -1,7 +1,7 @@
 # Koi ERP – Vertical Slice Modular Monolith
 
-Koi ERP adalah hasil re-engineering dari sistem IBS lama menjadi **.NET Modular Monolith** dengan pendekatan **Vertical Slice + Domain-Driven Design (DDD)**.  
-Tujuan utama: modernisasi arsitektur, efisiensi tim kecil (2–5 dev), dan kesiapan menuju **microservices** bila kebutuhan bisnis meningkat.
+Koi ERP adalah modernisasi dari sistem IBS lama menjadi **.NET Modular Monolith** dengan pendekatan **Vertical Slice + Domain-Driven Design (DDD)**.  
+Tujuan: modular, scalable, aman, dan siap dievolusi menjadi **microservices** bila dibutuhkan.
 
 ---
 
@@ -11,42 +11,54 @@ Tujuan utama: modernisasi arsitektur, efisiensi tim kecil (2–5 dev), dan kesia
   - C# (.NET 13 / ASP.NET Core 10)  
   - CQRS + Vertical Slice + DDD  
 - **Database**: PostgreSQL (schema-per-module, EF Core migrations)  
-- **Integrasi**:  
-  - Outbox Pattern + Event Bus (RabbitMQ / Kafka)  
-  - Staging DB untuk IBS/DMS integration  
+- **Integrasi**: Outbox Pattern + Event Bus (RabbitMQ/Kafka)  
 - **Security & IAM**:  
-  - **Keycloak** sebagai Identity & Access Management (OAuth2.0 / OpenID Connect)  
-  - JWT + RBAC + Fine-grained permission  
-  - Multi-Tenancy dengan `TenantId` filtering  
+  - **Keycloak** sebagai Identity Provider (OAuth2.0 / OIDC)  
+  - JWT + RBAC + contextual access (BranchId, TenantId)  
+  - Fine-grained permission di `Koi.Security`  
 - **Deployment & Infra**:  
-  - Docker + Kubernetes (opsional)  
+  - Docker, Kubernetes (opsional), IaC (Terraform/Ansible)  
   - CI/CD (GitHub Actions / Azure DevOps)  
-  - IaC (Terraform / Ansible)  
 - **Observability**:  
-  - Logging → Serilog + Seq  
-  - Tracing → OpenTelemetry + Jaeger  
-  - Metrics → Prometheus + Grafana  
+  - **.NET Aspire Dashboard** (logs, metrics, traces)  
+  - Serilog + Seq, OpenTelemetry + Jaeger, Prometheus + Grafana  
+
+---
+
+## 🔧 Developer Experience (Aspire)
+
+Koi ERP memanfaatkan **.NET Aspire** untuk mempermudah pengembangan dan observability.
+
+- **Aspire Projects**  
+  - `Koi.AppHost` → orchestration modul, Postgres, RabbitMQ, Keycloak  
+  - `Koi.ServiceDefaults` → shared konfigurasi logging, tracing, metrics  
+
+- **Fitur Utama**  
+  - Aspire Dashboard: monitoring logs, traces, metrics antar modul  
+  - Service orchestration: jalankan API + DB + broker + IAM sekali klik  
+  - Konsistensi konfigurasi: dari dev → staging → prod  
+
+- **Keuntungan**  
+  - Setup dev cepat, tidak perlu konfigurasi docker-compose manual  
+  - Monitoring built-in sejak tahap development  
+  - Memudahkan debugging flow antar modul (Sales → Invoice → AR → GL)  
 
 ---
 
 ## 🔒 Identity & Access Management (IAM)
 
-Koi ERP menggunakan **Keycloak** sebagai penyedia IAM utama.  
-
-- **Authentication**  
-  - Semua modul `Koi.*` memvalidasi token JWT dari Keycloak  
+- **Provider**: Keycloak  
+- **Authentication**:  
+  - Semua modul memvalidasi JWT dari Keycloak  
   - Mendukung SSO (Microsoft, Google, LDAP)  
-  - Refresh token & session management handled by Keycloak  
-
-- **Authorization**  
-  - Role-Based Access Control (RBAC) dikelola di Keycloak  
-  - Fine-grained permission ditangani oleh modul `Koi.Security`  
-  - Context-based access (misal: `BranchId`, `TenantId`)  
-
-- **Integration Flow**  
-  - `Koi.Identity` berperan sebagai adapter antara Keycloak dan aplikasi  
-  - Sinkronisasi user, role, dan branch data ke internal DB  
-  - Semua request ke API → validasi JWT di middleware → cek permission di `Koi.Security`  
+  - Refresh token, session revoke → handled by Keycloak  
+- **Authorization**:  
+  - RBAC di Keycloak (role global)  
+  - Fine-grained permission → `Koi.Security`  
+  - Context-based access (TenantId, BranchId)  
+- **Integration Flow**:  
+  - `Koi.Identity` = adapter + sync service dari Keycloak ke internal DB  
+  - Semua request API → middleware JWT → cek role/permission  
 
 ---
 
@@ -68,6 +80,7 @@ Koi.sln
 │ └─ Koi.Sales # Sales order & delivery
 └─ tests/ # unit & integration test
 ```
+
 
 
 ---
