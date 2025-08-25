@@ -158,7 +158,7 @@ Beberapa prinsip utama yang diterapkan:
 - **Bahama & Framework** → C# (.NET 13 / ASP.NET Core 10).  
 - **Database** → PostgreSQL (schema per modul).  
 - **Integrasi** → Outbox Pattern + Event Bus.  
-- **Autentikasi & Otorisasi** → `Koi.Identity` + `Koi.Security` berbasis JWT + RBAC.  
+- **Autentikasi & Otorisasi** → `Koi.Identity`  + `Koi.Security` berbasis JWT + RBAC. (Menggunakan KeyCloak)  
 - **Deployment** → Containerized (Docker), dapat diorkestrasi dengan Kubernetes bila perlu.  
 
 ---
