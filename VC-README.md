@@ -155,6 +155,8 @@ Beberapa prinsip utama yang diterapkan:
 
 ### 2.3 Keputusan Arsitektur Utama
 - **Arsitektur Utama** → Vertical Slice Modular Monolith.  
+
+- **Orkestrasi & Observability** → Menggunakan .NET Aspire sebagai stack cloud-native untuk menjalankan seluruh modul secara terintegrasi, menyediakan dashboard observability, tracing, dan health check bawaan.
 - **Bahama & Framework** → C# (.NET 13 / ASP.NET Core 10).  
 - **Database** → PostgreSQL (schema per modul).  
 - **Integrasi** → Outbox Pattern + Event Bus.  
