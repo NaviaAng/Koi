@@ -152,4 +152,8 @@ Koi.sln
 - Untuk setup Keycloak lokal (dev), gunakan `docker-compose` di folder `/docker/`.
 
 ## Full [Architecture Ducument](https://github.com/NaviaAng/Koi/blob/57a91c127d625ebf6b8d246557450613020eb4db/architecture.md)
+## [Cheatsheet Onion Architecture]([https://github.com/NaviaAng/Koi/blob/57a91c127d625ebf6b8d246557450613020eb4db/architecture.md](https://cheatography.com/vikbert/cheat-sheets/onion-architecture-symfony/))
+
+
+
 
