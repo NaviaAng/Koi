@@ -60,8 +60,7 @@ Koi.sln
 ### 🔹 Struktur per Service
 
 
-```
-plaintext
+```plaintext
 OrganizationService/
 ├── Features/
 │   ├── Company/
@@ -89,18 +88,22 @@ OrganizationService/
 ```
 
 ```plaintext
-ProductServices/
-├── Product.WebApi/
-├── Product.Application/
-├── Product.Domain/
-├── Product.Infrastructure/
-├── Product.Features/
+ProductService/
+├── Features/
 │   ├── Product/
-│   │   ├── CreateProduct/
-│   │   ├── EditProduct/
-│   │   ├── DeleteProduct/
-│   │   └── GetProductById/
-├── Product.Tests/
+│   │   ├── Commands/
+│   │   ├── Queries/
+│   │   ├── Shared/
+│   │   └── ProductController.cs
+│   ├── ProductType/
+│   ├── Category/
+│   ├── Class/
+├── Application/
+├── Domain/
+├── Infrastructure/
+├── Shared/
+├── WebApi/
+└── Tests/
 ```
 
 ### 🔹 Slice Example: `CreateProduct`
