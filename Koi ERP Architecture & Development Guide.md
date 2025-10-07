@@ -59,6 +59,35 @@ Koi.sln
 
 ### 🔹 Struktur per Service
 
+
+```
+plaintext
+OrganizationService/
+├── Features/
+│   ├── Company/
+│   │   ├── Commands/
+│   │   │   ├── CreateCompany/
+│   │   │   ├── EditCompany/
+│   │   │   ├── DeleteCompany/
+│   │   ├── Queries/
+│   │   │   ├── GetCompanyById/
+│   │   ├── Shared/
+│   │   │   ├── CompanyEntity.cs
+│   │   │   ├── ICompanyRepository.cs
+│   │   └── CompanyController.cs
+│   ├── Site/
+│   │   ├── Commands/
+│   │   ├── Queries/
+│   │   ├── Shared/
+│   │   └── SiteController.cs
+├── Application/
+├── Domain/
+├── Infrastructure/
+├── Shared/
+├── WebApi/
+└── Tests/
+```
+
 ```plaintext
 ProductServices/
 ├── Product.WebApi/
